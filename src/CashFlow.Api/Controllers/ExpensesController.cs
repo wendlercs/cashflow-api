@@ -11,8 +11,28 @@ public class ExpensesController : CashFlowBaseController
     [ProducesResponseType(typeof(ResponseRegisterExpenseJson), StatusCodes.Status201Created)]
     public IActionResult Register([FromBody] RequestRegisterExpenseJson request)
     {
-        var response = new RegisterExpenseUseCase().Execute(request);
+        try
+        {
+            var response = new RegisterExpenseUseCase().Execute(request);
 
-        return Created(string.Empty, response);
+            return Created(string.Empty, response);
+        }
+        catch (ArgumentException ex)
+        {
+            var errorMessage = new ResponseErrorJson
+            {
+                ErrorMessage = ex.Message
+            };
+
+            return BadRequest(errorMessage);
+        }
+        catch
+        {
+            var errorMessage = new ResponseErrorJson
+            {
+                ErrorMessage = "Unknown Error"
+            };
+            return StatusCode(StatusCodes.Status500InternalServerError, errorMessage);
+        }
     }
 }
